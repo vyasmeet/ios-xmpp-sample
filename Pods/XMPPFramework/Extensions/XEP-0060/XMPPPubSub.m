@@ -18,6 +18,9 @@
 {
 	XMPPJID *serviceJID;
 	XMPPJID *myJID;
+    
+    NSArray<XMPPJID *> *pepPublisherJIDs;
+    NSArray<NSString *> *pepNodes;
 	
 	NSMutableDictionary *subscribeDict;
 	NSMutableDictionary *unsubscribeDict;
@@ -38,20 +41,64 @@
 
 @synthesize serviceJID;
 
-- (id)init
+- (NSArray<XMPPJID *> *)pepPublisherJIDs
 {
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPPubSub.h are supported.
-	
-	return [self initWithServiceJID:nil dispatchQueue:NULL];
+    __block NSArray<XMPPJID *> *result;
+    
+    dispatch_block_t block = ^{
+        result = self->pepPublisherJIDs;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
 }
 
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+- (void)setPepPublisherJIDs:(NSArray<XMPPJID *> *)pepPublisherJIDs
 {
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPPubSub.h are supported.
-	
-	return [self initWithServiceJID:nil dispatchQueue:NULL];
+    NSArray<XMPPJID *> *newValue = [pepPublisherJIDs copy];
+    
+    dispatch_block_t block = ^{
+        self->pepPublisherJIDs = newValue;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (NSArray<NSString *> *)pepNodes
+{
+    __block NSArray<NSString *> *result;
+    
+    dispatch_block_t block = ^{
+        result = self->pepNodes;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setPepNodes:(NSArray<NSString *> *)pepNodes
+{
+    NSArray<NSString *> *newValue = [pepNodes copy];
+    
+    dispatch_block_t block = ^{
+        self->pepNodes = newValue;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 
 - (id)initWithServiceJID:(XMPPJID *)aServiceJID
@@ -127,9 +174,9 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (xmppStream == stream)
+		if (self->xmppStream == stream)
 		{
-			myJID = xmppStream.myJID;
+			self->myJID = self->xmppStream.myJID;
 		}
 	}};
 	
@@ -433,29 +480,52 @@
 **/
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
+    // <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
+    //   <event xmlns='http://jabber.org/protocol/pubsub#event'>
+    //     <items node='/pubsub.foo'>
+    //       <item id='5036AA52A152B'>
+    //         [... entry ...]
+    //       </item>
+    //     </items>
+    //   </event>
+    // </message>
+    
+    NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
+    if (!event) return;
+    
 	// Check to see if message is from our PubSub/PEP service
 	if (serviceJID) {
 		if (![serviceJID isEqualToJID:[message from]]) return;
 	}
 	else {
-		if ([myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+        if (self.pepPublisherJIDs) {
+            BOOL isFromPEPPublisher = NO;
+            for (XMPPJID *pepPublisherJID in self.pepPublisherJIDs) {
+                if ([pepPublisherJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) {
+                    isFromPEPPublisher = YES;
+                    break;
+                }
+            }
+            if (!isFromPEPPublisher) return;
+        }
+
+        if (self.pepNodes) {
+            for (NSString *eventType in @[@"collection", @"configuration", @"delete", @"items", @"purge", @"subscription"]) {
+                NSXMLElement *eventChildElement = [event elementForName:eventType];
+                if (!eventChildElement) continue;
+                
+                NSString *node = [eventChildElement attributeStringValueForName:@"node"];
+                if (!node || ![self.pepNodes containsObject:node]) return;
+                break;
+            }
+        }
+        
+        if (!self.pepPublisherJIDs && !self.pepNodes) {
+            if (![myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+        }
 	}
-	
-	// <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
-	//   <event xmlns='http://jabber.org/protocol/pubsub#event'>
-	//     <items node='/pubsub.foo'>
-	//       <item id='5036AA52A152B'>
-	//         [... entry ...]
-	//       </item>
-	//     </items>
-	//   </event>
-	// </message>
-	
-	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
-	if (event)
-	{
-		[multicastDelegate xmppPubSub:self didReceiveMessage:message];
-	}
+    
+    [multicastDelegate xmppPubSub:self didReceiveMessage:message];
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
@@ -555,7 +625,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		subscribeDict[uuid] = node;
+		self->subscribeDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.1.1:
@@ -631,7 +701,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		unsubscribeDict[uuid] = node;
+		self->unsubscribeDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.2.1:
@@ -674,9 +744,9 @@
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
 		if (node)
-			retrieveSubsDict[uuid] = node;
+			self->retrieveSubsDict[uuid] = node;
 		else
-			retrieveSubsDict[uuid] = [NSNull null];
+			self->retrieveSubsDict[uuid] = [NSNull null];
 	});
 	
 	// Get subscriptions for all nodes:
@@ -727,7 +797,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		configSubDict[uuid] = node;
+		self->configSubDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.3.5:
@@ -792,7 +862,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		createDict[uuid] = node;
+		self->createDict[uuid] = node;
 	});
 	
 	// <iq type='set' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='create1'>
@@ -852,7 +922,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		deleteDict[uuid] = node;
+		self->deleteDict[uuid] = node;
 	});
 	
 	// Example XEP-0060 section 8.4.1:
@@ -891,7 +961,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		configNodeDict[uuid] = node;
+		self->configNodeDict[uuid] = node;
 	});
 	
 	// <iq type='get' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='config1'>
@@ -996,7 +1066,7 @@
 	[xmppStream sendElement:iq];
 	
 	dispatch_async(moduleQueue, ^{
-		publishDict[uuid] = node;
+		self->publishDict[uuid] = node;
 	});
 	return uuid;
 }
@@ -1045,7 +1115,7 @@
     [xmppStream sendElement:iq];
     
     dispatch_async(moduleQueue, ^{
-        retrieveItemsDict[uuid] = node;
+        self->retrieveItemsDict[uuid] = node;
     });
     return uuid;
 }

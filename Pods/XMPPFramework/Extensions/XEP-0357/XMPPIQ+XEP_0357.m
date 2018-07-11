@@ -9,13 +9,21 @@
 #import "XMPPIQ+XEP_0357.h"
 #import "XMPPJID.h"
 #import "NSXMLElement+XMPP.h"
+#import "XMPPStream.h"
 
 NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
 
 @implementation XMPPIQ (XEP0357)
 
-+ (instancetype)enableNotificationsElementWithJID:(XMPPJID *)jid node:(NSString *)node options:(nullable NSDictionary<NSString *,NSString *> *)options
++ (instancetype)enableNotificationsElementWithJID:(XMPPJID *)jid node:(NSString *)node options:(nullable NSDictionary<NSString *,NSString *> *)options {
+    return [self enableNotificationsElementWithJID:jid node:node options:options elementId:nil];
+}
+
++ (instancetype)enableNotificationsElementWithJID:(XMPPJID *)jid node:(NSString *)node options:(nullable NSDictionary<NSString *,NSString *> *)options elementId:(NSString *)elementId
 {
+    if (!elementId) {
+        elementId = [XMPPStream generateUUID];
+    }
     NSXMLElement *enableElement = [self elementWithName:@"enable" xmlns:XMPPPushXMLNS];
     [enableElement addAttributeWithName:@"jid" stringValue:[jid full]];
     if ([node length]) {
@@ -24,6 +32,7 @@ NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
     
     if ([options count]) {
         NSXMLElement *dataForm = [self elementWithName:@"x" xmlns:@"jabber:x:data"];
+        [dataForm addAttributeWithName:@"type" stringValue:@"submit"];
         NSXMLElement *formTypeField = [NSXMLElement elementWithName:@"field"];
         [formTypeField addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
         [formTypeField addChild:[NSXMLElement elementWithName:@"value" stringValue:@"http://jabber.org/protocol/pubsub#publish-options"]];
@@ -38,18 +47,25 @@ NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
         [enableElement addChild:dataForm];
     }
     
-    return [self iqWithType:@"set" child:enableElement];
+    return [self iqWithType:@"set" elementID:elementId child:enableElement];
     
 }
 
-+ (instancetype)disableNotificationsElementWithJID:(XMPPJID *)jid node:(NSString *)node
++ (instancetype)disableNotificationsElementWithJID:(XMPPJID *)jid node:(NSString *)node {
+    return [self disableNotificationsElementWithJID:jid node:node elementId:nil];
+}
+
++ (instancetype)disableNotificationsElementWithJID:(XMPPJID *)jid node:(NSString *)node elementId:(nullable NSString *)elementId
 {
+    if (!elementId) {
+        elementId = [XMPPStream generateUUID];
+    }
     NSXMLElement *disableElement = [self elementWithName:@"disable" xmlns:XMPPPushXMLNS];
     [disableElement addAttributeWithName:@"jid" stringValue:[jid full]];
     if ([node length]) {
         [disableElement addAttributeWithName:@"node" stringValue:node];
     }
-    return [self iqWithType:@"set" child:disableElement];
+    return [self iqWithType:@"set" elementID:elementId child:disableElement];
 }
 
 @end

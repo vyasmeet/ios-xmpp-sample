@@ -10,7 +10,6 @@
 #import "XMPPIncomingFileTransfer.h"
 #import "XMPPConstants.h"
 #import "XMPPLogging.h"
-#import "idn-int.h"
 #import "NSNumber+XMPP.h"
 #import "NSData+XMPP.h"
 
@@ -154,7 +153,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         XMPPIQ *iq = [XMPPIQ iqWithType:@"result"
                                      to:request.from
                               elementID:request.elementID];
-        [iq addAttributeWithName:@"from" stringValue:xmppStream.myJID.full];
+        [iq addAttributeWithName:@"from" stringValue:self->xmppStream.myJID.full];
 
         NSXMLElement
             *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPDiscoInfoNamespace];
@@ -185,7 +184,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         }
 
         [iq addChild:query];
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
       }
   };
 
@@ -209,7 +208,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
   dispatch_block_t block = ^{
       @autoreleasepool {
         // Store the sender's JID
-        _senderJID = offer.from;
+        self->_senderJID = offer.from;
 
         // Store the sid for later use
         NSXMLElement *inSi = offer.childElement;
@@ -217,10 +216,10 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
 
         // Store the size of the incoming data for later use
         NSXMLElement *inFile = [inSi elementForName:@"file"];
-        _totalDataSize = [inFile attributeUnsignedIntegerValueForName:@"size"];
+        self->_totalDataSize = [inFile attributeUnsignedIntegerValueForName:@"size"];
 
         // Store the name of the file for later use
-        _receivedFileName = [inFile attributeStringValueForName:@"name"];
+        self->_receivedFileName = [inFile attributeStringValueForName:@"name"];
 
         // Outgoing
         XMPPIQ *iq = [XMPPIQ iqWithType:@"result"
@@ -244,10 +243,10 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         // Prefer SOCKS5 if it's not disabled.
         if (!self.disableSOCKS5) {
           [value setStringValue:XMPPBytestreamsNamespace];
-          _transferState = XMPPIFTStateWaitingForStreamhosts;
+          self->_transferState = XMPPIFTStateWaitingForStreamhosts;
         } else {
           [value setStringValue:XMPPIBBNamespace];
-          _transferState = XMPPIFTStateWaitingForIBBOpen;
+          self->_transferState = XMPPIFTStateWaitingForIBBOpen;
         }
 
         [field addChild:value];
@@ -256,7 +255,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         [si addChild:feature];
         [iq addChild:si];
 
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
       }
   };
 
@@ -282,10 +281,10 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         XMPPIQ *iq = [XMPPIQ iqWithType:@"result"
                                      to:request.from
                               elementID:request.elementID];
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
 
         // Prepare to receive data
-        _receivedData = [NSMutableData new];
+        self->_receivedData = [NSMutableData new];
       }
   };
 
@@ -314,21 +313,21 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         NSXMLElement *dataElem = received.childElement;
         NSData
             *temp = [[NSData alloc] initWithBase64EncodedString:dataElem.stringValue options:0];
-        [_receivedData appendData:temp];
+        [self->_receivedData appendData:temp];
 
         // According the base64 encoding, it takes up 4/3 n bytes of space, so
         // we need to find the size of the data before base64.
-        _receivedDataSize += (3 * dataElem.stringValue.length) / 4;
+        self->_receivedDataSize += (3 * dataElem.stringValue.length) / 4;
 
         XMPPLogVerbose(@"Downloaded %lu/%lu bytes in IBB transfer.",
-                       (unsigned long) _receivedDataSize, (unsigned long) _totalDataSize);
+                       (unsigned long) self->_receivedDataSize, (unsigned long) self->_totalDataSize);
 
-        if (_receivedDataSize < _totalDataSize) {
+        if (self->_receivedDataSize < self->_totalDataSize) {
           // Send ack response
           XMPPIQ *iq = [XMPPIQ iqWithType:@"result"
                                        to:received.from
                                 elementID:received.elementID];
-          [xmppStream sendElement:iq];
+          [self->xmppStream sendElement:iq];
         } else {
           // We're finished!
           XMPPLogInfo(@"Finished downloading IBB data.");
@@ -377,10 +376,10 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
   NSXMLElement *si = iq.childElement;
   if (!si || ![si.xmlns isEqualToString:XMPPSINamespace]) return NO;
 
-  NSXMLElement *file = (DDXMLElement *) [si childAtIndex:0];
+  NSXMLElement *file = (NSXMLElement *) [si childAtIndex:0];
   if (!file || ![file.xmlns isEqualToString:XMPPSIProfileFileTransferNamespace]) return NO;
 
-  NSXMLElement *feature = (DDXMLElement *) [si childAtIndex:1];
+  NSXMLElement *feature = (NSXMLElement *) [si childAtIndex:1];
   return !(!feature || ![feature.xmlns isEqualToString:XMPPFeatureNegNamespace]);
 
   // Maybe there should be further verification, but I think this should be
@@ -484,9 +483,9 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
       @autoreleasepool {
         [self cancelIBBTimer];
 
-        [multicastDelegate xmppIncomingFileTransfer:self
-                                 didSucceedWithData:_receivedData
-                                              named:_receivedFileName];
+        [self->multicastDelegate xmppIncomingFileTransfer:self
+                                       didSucceedWithData:self->_receivedData
+                                                    named:self->_receivedFileName];
         [self cleanUp];
       }
   };
@@ -686,25 +685,25 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
 
   dispatch_block_t block = ^{
       @autoreleasepool {
-        _streamhostsQueryId = iq.elementID;
-        _transferState = XMPPIFTStateConnectingToStreamhosts;
-        _asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:moduleQueue];
+        self->_streamhostsQueryId = iq.elementID;
+        self->_transferState = XMPPIFTStateConnectingToStreamhosts;
+        self->_asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:self->moduleQueue];
 
         // Since we've already validated our IQ stanza, we can just pull the data
         NSArray *streamhosts = [iq.childElement elementsForName:@"streamhost"];
 
         for (NSXMLElement *streamhost in streamhosts) {
           NSString *host = [streamhost attributeStringValueForName:@"host"];
-          uint16_t port = (gl_uint16_t) [streamhost attributeUInt32ValueForName:@"port"];
+          uint16_t port = [streamhost attributeUInt32ValueForName:@"port"];
 
           NSError *err;
-          if (![_asyncSocket connectToHost:host onPort:port error:&err]) {
+          if (![self->_asyncSocket connectToHost:host onPort:port error:&err]) {
             XMPPLogVerbose(@"%@: Unable to host:%@ port:%d error:%@", THIS_FILE, host, port, err);
             continue;
           }
 
           // If we make it this far, we've successfully connected to one of the hosts.
-          _streamhostUsed = [streamhost attributeStringValueForName:@"jid"];
+          self->_streamhostUsed = [streamhost attributeStringValueForName:@"jid"];
 
           return;
         }
@@ -734,7 +733,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         [errorElem addChild:notAcceptable];
         [errorIq addChild:errorElem];
 
-        [xmppStream sendElement:errorIq];
+        [self->xmppStream sendElement:errorIq];
 
         NSString *errMsg = @"Unable to connect to any of the provided streamhosts.";
         [self failWithReason:errMsg error:nil];
@@ -782,7 +781,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         memcpy(byteBuf + 2, &methods, sizeof(methods));
 
         NSData *data = [NSData dataWithBytesNoCopy:byteBuf length:3 freeWhenDone:YES];
-        [_asyncSocket writeData:data withTimeout:TIMEOUT_WRITE tag:SOCKS_TAG_WRITE_METHOD];
+        [self->_asyncSocket writeData:data withTimeout:TIMEOUT_WRITE tag:SOCKS_TAG_WRITE_METHOD];
       }
   };
 
@@ -867,7 +866,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         memcpy(byteBuf + 6 + hashlen, &port, sizeof(port));
 
         NSData *data = [NSData dataWithBytesNoCopy:byteBuf length:47 freeWhenDone:YES];
-        [_asyncSocket writeData:data withTimeout:TIMEOUT_WRITE tag:SOCKS_TAG_WRITE_CONNECT];
+        [self->_asyncSocket writeData:data withTimeout:TIMEOUT_WRITE tag:SOCKS_TAG_WRITE_CONNECT];
 
         XMPPLogVerbose(@"%@: writing connect request: %@", THIS_FILE, data);
       }
@@ -927,7 +926,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
         //    </query>
         //  </iq>
 
-        XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:_senderJID elementID:_streamhostsQueryId];
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:self->_senderJID elementID:self->_streamhostsQueryId];
 
         NSXMLElement *query = [NSXMLElement elementWithName:@"query"
                                                       xmlns:XMPPBytestreamsNamespace];
@@ -935,19 +934,19 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
 
         NSXMLElement *streamhostUsed = [NSXMLElement elementWithName:@"streamhost-used"];
         [streamhostUsed addAttributeWithName:@"jid"
-                                 stringValue:_streamhostUsed];
+                                 stringValue:self->_streamhostUsed];
 
         [query addChild:streamhostUsed];
         [iq addChild:query];
 
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
 
         // We're basically piping these to dev/null because we don't care.
         // However, we need to tag this read so we can start to read the actual
         // data once this read is finished.
-        [_asyncSocket readDataToLength:hostlen + 2
-                           withTimeout:TIMEOUT_READ
-                                   tag:SOCKS_TAG_READ_ADDRESS];
+        [self->_asyncSocket readDataToLength:hostlen + 2
+                                 withTimeout:TIMEOUT_READ
+                                         tag:SOCKS_TAG_READ_ADDRESS];
       }
   };
 

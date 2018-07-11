@@ -44,7 +44,7 @@ class XMPPController: NSObject {
 	}
 	
 	func connect() {
-		if !self.xmppStream.isDisconnected() {
+		if !self.xmppStream.isDisconnected {
 			return
 		}
 

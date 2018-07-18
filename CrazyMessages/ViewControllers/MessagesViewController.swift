@@ -20,11 +20,26 @@ class MessagesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.xmppController.joinOrCreateRoom()
+        self.messageTxt.becomeFirstResponder()
         self.navigationItem.hidesBackButton = true
         self.tableView.dataSource = self
         self.tableView.delegate = self
         self.xmppController.messageDelegate = self
     }
+    
+    @IBAction func sendMessage(_ sender: UIButton) {
+        if self.messageTxt.text?.trimmingCharacters(in: .whitespaces) != "" {
+//            let message = self.messageTxt.text!
+//            let senderJID = XMPPJID(string: "user2@localhost")!
+//            let msg = XMPPMessage(type: "chat", to: senderJID)
+//            msg.addBody(message)
+//            self.xmppController.xmppStream.send(msg)
+             self.xmppController.xmppRoom.sendMessage(withBody: self.messageTxt.text!)
+        }
+        self.messageTxt.text = ""
+    }
+    
 }
 
 extension MessagesViewController: UITableViewDataSource {

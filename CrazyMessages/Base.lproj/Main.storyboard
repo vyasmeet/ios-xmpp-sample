@@ -69,6 +69,9 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4s9-DF-rrb">
                                 <rect key="frame" x="258" y="72" width="101" height="30"/>
                                 <state key="normal" title="Send Message"/>
+                                <connections>
+                                    <action selector="sendMessage:" destination="Pd8-ne-SC3" eventType="touchUpInside" id="WLv-TI-so5"/>
+                                </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="kyu-aT-2UL">
                                 <rect key="frame" x="0.0" y="110" width="375" height="557"/>
@@ -115,7 +118,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="messageTxt" destination="JXx-NY-HdZ" id="cOX-6b-DTY"/>
+                        <outlet property="messageTxt" destination="JXx-NY-HdZ" id="IX4-qa-Ukg"/>
                         <outlet property="tableView" destination="kyu-aT-2UL" id="OgQ-PA-27v"/>
                     </connections>
                 </viewController>

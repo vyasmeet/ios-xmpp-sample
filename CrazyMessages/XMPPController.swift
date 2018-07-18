@@ -21,12 +21,13 @@ class XMPPController: NSObject {
     
     var messageDelegate: MessageDelegate?
 	var xmppStream: XMPPStream
+    var xmppRoom: XMPPRoom!
 	
 	let hostName: String
 	let userJID: XMPPJID
 	let hostPort: UInt16
 	let password: String
-	
+    
 	init(hostName: String, userJIDString: String, hostPort: UInt16 = 5222, password: String) throws {
         guard let userJID = XMPPJID(string: userJIDString) else {
 			throw XMPPControllerError.wrongUserJID
@@ -43,10 +44,17 @@ class XMPPController: NSObject {
 		self.xmppStream.hostPort = hostPort
 		self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.allowed
 		self.xmppStream.myJID = userJID
-		
+        
+//        let roomMemory = XMPPRoomMemoryStorage()!
+//        let roomID = XMPPJID(string: "room123@conference.localhost")!
+//        self.xmppRoom = XMPPRoom(roomStorage: roomMemory, jid: roomID, dispatchQueue: DispatchQueue.main)
+//        self.xmppRoom.activate(self.xmppStream)
+        
 		super.init()
 		
 		self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
+//        self.xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
+//        self.xmppRoom.join(usingNickname: self.xmppStream.myJID?.bare, history: nil, password: nil)
 	}
 	
 	func connect() {
@@ -55,6 +63,15 @@ class XMPPController: NSObject {
 		}
         try! self.xmppStream.connect(withTimeout: XMPPStreamTimeoutNone)
 	}
+    
+    func joinOrCreateRoom() {
+        let roomMemory = XMPPRoomMemoryStorage()!
+        let roomID = XMPPJID(string: "room123@conference.localhost")!
+        self.xmppRoom = XMPPRoom(roomStorage: roomMemory, jid: roomID, dispatchQueue: DispatchQueue.main)
+        self.xmppRoom.activate(self.xmppStream)
+        self.xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
+        self.xmppRoom.join(usingNickname: self.xmppStream.myJID!.bare, history: nil, password: nil)
+    }
 }
 
 extension XMPPController: XMPPStreamDelegate {
@@ -74,6 +91,7 @@ extension XMPPController: XMPPStreamDelegate {
 	}
     
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
+        print("Stream: Message received... ===> ", message)
         if message.isChatMessageWithBody {
             self.messageDelegate?.messageReceived(message: message)
         }

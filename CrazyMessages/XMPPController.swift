@@ -92,8 +92,6 @@ extension XMPPController: XMPPStreamDelegate {
     
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
         print("Stream: Message received... ===> ", message)
-        if message.isChatMessageWithBody {
-            self.messageDelegate?.messageReceived(message: message)
-        }
+        self.messageDelegate?.messageReceived(message: message)
     }
 }

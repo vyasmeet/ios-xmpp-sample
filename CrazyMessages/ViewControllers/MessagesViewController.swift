@@ -11,7 +11,7 @@ import XMPPFramework
 
 class MessagesViewController: UIViewController {
     
-    var messages = [String:String]()
+    var messages = [[String:String]]()
     
     var xmppController: XMPPController!
 
@@ -47,7 +47,9 @@ extension MessagesViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChatMessageCell") else {
             return UITableViewCell()
         }
-        
+        if let message = self.messages[indexPath.row]["message"] {
+            cell.textLabel?.text = message
+        }
         return cell
     }
     
@@ -69,6 +71,12 @@ extension MessagesViewController : UITableViewDelegate {
 
 extension MessagesViewController : MessageDelegate {
     func messageReceived(message: XMPPMessage) {
-        print("XMPP Message Received ===> ",message)
+        //print(message.attribute(forName: "from")?.stringValue)
+        if let bodyElement = message.forName("body"), let message = bodyElement.stringValue {
+            // if !self.messages.isEmpty { self.messages.removeAll() }
+            let message = ["message":message]
+            self.messages.append(message)
+            self.tableView.reloadData()
+        }
     }
 }

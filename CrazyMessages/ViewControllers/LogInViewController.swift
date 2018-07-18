@@ -28,9 +28,9 @@ class LogInViewController: UIViewController {
 	}
 
 	@IBAction func logInAction(sender: AnyObject) {
-		if self.userJIDLabel.text?.characters.count == 0
-		  || self.userPasswordLabel.text?.characters.count == 0
-		  || self.serverLabel.text?.characters.count == 0 {
+		if self.userJIDLabel.text?.count == 0
+		  || self.userPasswordLabel.text?.count == 0
+		  || self.serverLabel.text?.count == 0 {
 				
 			self.errorLabel.text = "Something is missing or wrong!"
 			return

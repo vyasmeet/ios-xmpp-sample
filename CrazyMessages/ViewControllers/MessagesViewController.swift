@@ -20,7 +20,7 @@ class MessagesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //self.xmppController.joinOrCreateRoom()
+        self.xmppController.joinOrCreateRoom()
         self.messageTxt.becomeFirstResponder()
         self.navigationItem.hidesBackButton = true
         self.tableView.dataSource = self
@@ -29,7 +29,8 @@ class MessagesViewController: UIViewController {
     }
     
     @IBAction func sendMessage(_ sender: UIButton) {
-        self.sendMessage(to: "dhaval@localhost")
+        // self.sendMessage(to: "dhaval@localhost")
+        self.sendMessageToGroup()
     }
     
     func sendMessage(to user:String) {

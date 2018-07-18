@@ -60,6 +60,9 @@ extension MessagesViewController: UITableViewDataSource {
         if let message = self.messages[indexPath.row]["message"] {
             cell.textLabel?.text = message
         }
+        if let fromText = self.messages[indexPath.row]["from"] {
+            cell.detailTextLabel?.text = fromText
+        }
         return cell
     }
     
@@ -81,11 +84,14 @@ extension MessagesViewController : UITableViewDelegate {
 
 extension MessagesViewController : MessageDelegate {
     func messageReceived(message: XMPPMessage) {
-        //print(message.attribute(forName: "from")?.stringValue)
-        if let bodyElement = message.forName("body"), let message = bodyElement.stringValue {
+        // print("FROM ==> ",message.attribute(forName: "from")?.stringValue)
+        if let bodyElement = message.forName("body"), let messageTxt = bodyElement.stringValue {
             // if !self.messages.isEmpty { self.messages.removeAll() }
-            let message = ["message":message]
-            self.messages.append(message)
+            var messageDict = ["message":messageTxt]
+            if let attribute = message.attribute(forName: "from"), let fromValue = attribute.stringValue {
+                messageDict["from"] = fromValue
+            }
+            self.messages.append(messageDict)
             self.tableView.reloadData()
         }
     }

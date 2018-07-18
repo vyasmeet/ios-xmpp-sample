@@ -45,16 +45,9 @@ class XMPPController: NSObject {
 		self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.allowed
 		self.xmppStream.myJID = userJID
         
-//        let roomMemory = XMPPRoomMemoryStorage()!
-//        let roomID = XMPPJID(string: "room123@conference.localhost")!
-//        self.xmppRoom = XMPPRoom(roomStorage: roomMemory, jid: roomID, dispatchQueue: DispatchQueue.main)
-//        self.xmppRoom.activate(self.xmppStream)
-        
 		super.init()
 		
 		self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
-//        self.xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
-//        self.xmppRoom.join(usingNickname: self.xmppStream.myJID?.bare, history: nil, password: nil)
 	}
 	
 	func connect() {

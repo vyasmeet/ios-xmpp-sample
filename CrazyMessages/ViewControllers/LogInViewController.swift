@@ -22,6 +22,9 @@ class LogInViewController: UIViewController {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.userJIDLabel.text = "user1@localhost"
+        self.userPasswordLabel.text = "root123"
+        self.serverLabel.text = "ec2-52-53-215-232.us-west-1.compute.amazonaws.com"
 	}
 
 	@IBAction func logInAction(sender: AnyObject) {

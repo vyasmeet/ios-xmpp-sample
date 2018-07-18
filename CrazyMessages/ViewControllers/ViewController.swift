@@ -33,6 +33,10 @@ class ViewController: UIViewController {
             let viewController = segue.destination as! LogInViewController
             viewController.delegate = self
         }
+        else if segue.identifier == "showChat" {
+            let msgVC = segue.destination as! MessagesViewController
+            msgVC.xmppController = self.xmppController
+        }
     }
 }
 
@@ -55,11 +59,12 @@ extension ViewController: LogInViewControllerDelegate {
 
 extension ViewController: XMPPStreamDelegate {
 
-    func xmppStreamDidAuthenticate(_ sender: XMPPStream!) {
+    func xmppStreamDidAuthenticate(_ sender: XMPPStream) {
         self.logInViewController?.dismiss(animated: true, completion: nil)
+        self.performSegue(withIdentifier: "showChat", sender: nil)
     }
     
-    func xmppStream(_ sender: XMPPStream!, didNotAuthenticate error: DDXMLElement!) {
+    func xmppStream(_ sender: XMPPStream, didNotAuthenticate error: DDXMLElement) {
         self.logInViewController?.showErrorMessage(message: "Wrong password or username")
     }
     

@@ -13,7 +13,13 @@ enum XMPPControllerError: Error {
 	case wrongUserJID
 }
 
+protocol MessageDelegate: class {
+    func messageReceived(message: XMPPMessage)
+}
+
 class XMPPController: NSObject {
+    
+    var messageDelegate: MessageDelegate?
 	var xmppStream: XMPPStream
 	
 	let hostName: String
@@ -47,24 +53,29 @@ class XMPPController: NSObject {
 		if !self.xmppStream.isDisconnected {
 			return
 		}
-
         try! self.xmppStream.connect(withTimeout: XMPPStreamTimeoutNone)
 	}
 }
 
 extension XMPPController: XMPPStreamDelegate {
 	
-	func xmppStreamDidConnect(_ stream: XMPPStream!) {
+    func xmppStreamDidConnect(_ stream: XMPPStream) {
 		print("Stream: Connected")
 		try! stream.authenticate(withPassword: self.password)
 	}
 	
-	func xmppStreamDidAuthenticate(_ sender: XMPPStream!) {
+    func xmppStreamDidAuthenticate(_ sender: XMPPStream) {
 		self.xmppStream.send(XMPPPresence())
 		print("Stream: Authenticated")
 	}
 	
-	func xmppStream(_ sender: XMPPStream!, didNotAuthenticate error: DDXMLElement!) {
+    func xmppStream(_ sender: XMPPStream, didNotAuthenticate error: DDXMLElement) {
 		print("Stream: Fail to Authenticate")
 	}
+    
+    func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
+        if message.isChatMessageWithBody {
+            self.messageDelegate?.messageReceived(message: message)
+        }
+    }
 }

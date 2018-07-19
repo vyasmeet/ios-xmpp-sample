@@ -19,6 +19,8 @@ class LogInViewController: UIViewController {
 
 	weak var delegate:LogInViewControllerDelegate?
 	var hud: MBProgressHUD!
+    
+    var xmppController: XMPPController!
 	
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,7 +48,29 @@ class LogInViewController: UIViewController {
 		
         self.delegate?.didTouchLogIn(sender: self, userJID: self.userJIDLabel.text!, userPassword: self.userPasswordLabel.text!, server: self.serverLabel.text!)
 	}
-	
+    
+    @IBAction func multipleConnections(_ sender: UIButton) {
+        
+        for i in 1...10 {
+            print("===> CONNECTING USER \(i) <===")
+            // usleep(500)
+            sleep(2)
+            let userJID = "user\(i)@localhost"
+            let password = "root123"
+            let host = "ec2-52-53-215-232.us-west-1.compute.amazonaws.com"
+            do {
+                try self.xmppController = XMPPController(hostName: host,
+                                                        userJIDString: userJID,
+                                                        password: password)
+                // self.xmppController.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
+                self.xmppController.connect()
+            } catch {
+                // sender.showErrorMessage(message: "Something went wrong")
+                print("Something went wrong")
+            }
+        }
+    }
+    
 	func showErrorMessage(message: String) {
 		hud.mode = .text
 		hud.label.text = message

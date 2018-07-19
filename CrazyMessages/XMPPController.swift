@@ -46,8 +46,10 @@ class XMPPController: NSObject {
 		self.xmppStream.myJID = userJID
         
 		super.init()
-		
-		self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+//        let backgroundQueue = DispatchQueue.global()
+//        self.xmppStream.addDelegate(self, delegateQueue: backgroundQueue)
+        self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
 	}
 	
 	func connect() {
@@ -71,7 +73,8 @@ extension XMPPController: XMPPStreamDelegate {
 	
     func xmppStreamDidConnect(_ stream: XMPPStream) {
 		print("Stream: Connected")
-		try! stream.authenticate(withPassword: self.password)
+        // stream.disconnectAfterSending()
+        try! stream.authenticate(withPassword: self.password)
 	}
 	
     func xmppStreamDidAuthenticate(_ sender: XMPPStream) {

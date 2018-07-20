@@ -15,6 +15,7 @@
 		E06D63511E11CAFC0092A99C /* XMPPController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06D63501E11CAFC0092A99C /* XMPPController.swift */; };
 		E06D63541E11CCC60092A99C /* LogInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06D63531E11CCC60092A99C /* LogInViewController.swift */; };
 		E0B8A2571E114CE7004D2E7B /* Pods_CrazyMessages.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC3395846F5F4841AC60B8BB /* Pods_CrazyMessages.framework */; };
+		E42F3DBF2101E39400EF7CB0 /* TestStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = E42F3DBE2101E39400EF7CB0 /* TestStream.swift */; };
 		E4EA838320FF1F3400273529 /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EA838220FF1F3400273529 /* MessagesViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		E01701421E114720005808B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E06D63501E11CAFC0092A99C /* XMPPController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMPPController.swift; sourceTree = "<group>"; };
 		E06D63531E11CCC60092A99C /* LogInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogInViewController.swift; sourceTree = "<group>"; };
+		E42F3DBE2101E39400EF7CB0 /* TestStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestStream.swift; sourceTree = "<group>"; };
 		E4EA838220FF1F3400273529 /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,6 +93,7 @@
 				E017013F1E11471F005808B1 /* LaunchScreen.storyboard */,
 				E017013D1E11471F005808B1 /* Assets.xcassets */,
 				E01701421E114720005808B1 /* Info.plist */,
+				E42F3DBE2101E39400EF7CB0 /* TestStream.swift */,
 			);
 			path = CrazyMessages;
 			sourceTree = "<group>";
@@ -244,6 +247,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E42F3DBF2101E39400EF7CB0 /* TestStream.swift in Sources */,
 				E4EA838320FF1F3400273529 /* MessagesViewController.swift in Sources */,
 				E06D63541E11CCC60092A99C /* LogInViewController.swift in Sources */,
 				E01701391E11471F005808B1 /* ViewController.swift in Sources */,

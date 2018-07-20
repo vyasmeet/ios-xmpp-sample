@@ -47,16 +47,20 @@ class XMPPController: NSObject {
         
 		super.init()
         
-//        let backgroundQueue = DispatchQueue.global()
-//        self.xmppStream.addDelegate(self, delegateQueue: backgroundQueue)
-        self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
+        let bgQueue = DispatchQueue(label: "com.xmpp.background.queue", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
+        self.xmppStream.addDelegate(self, delegateQueue: bgQueue)
+         // self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
 	}
 	
 	func connect() {
 		if !self.xmppStream.isDisconnected {
 			return
 		}
-        try! self.xmppStream.connect(withTimeout: XMPPStreamTimeoutNone)
+        do {
+            try self.xmppStream.connect(withTimeout: XMPPStreamTimeoutNone)
+        } catch {
+            print("STREAM CONNECT CATCHED ERROR ===> \(error.localizedDescription)")
+        }
 	}
     
     func joinOrCreateRoom() {

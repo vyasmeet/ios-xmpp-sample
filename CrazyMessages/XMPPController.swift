@@ -47,9 +47,9 @@ class XMPPController: NSObject {
         
 		super.init()
         
-        let bgQueue = DispatchQueue(label: "com.xmpp.background.queue", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
-        self.xmppStream.addDelegate(self, delegateQueue: bgQueue)
-         // self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
+//        let bgQueue = DispatchQueue(label: "com.xmpp.background.queue", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
+//        self.xmppStream.addDelegate(self, delegateQueue: bgQueue)
+        self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
 	}
 	
 	func connect() {

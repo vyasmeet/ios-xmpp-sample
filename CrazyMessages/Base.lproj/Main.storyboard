@@ -201,10 +201,12 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="l7O-dh-ath">
-                                <rect key="frame" x="122" y="490" width="131" height="43"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="l7O-dh-ath">
+                                <rect key="frame" x="122" y="570" width="131" height="43"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="43" id="442-sq-15f"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="17"/>
                                 <state key="normal" title="Multiple Log In">
                                     <color key="titleColor" red="0.66666666669999997" green="0.1176470588" blue="0.1764705882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -222,15 +224,18 @@
                         <color key="backgroundColor" red="0.66666666669999997" green="0.1176470588" blue="0.1764705882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="T2N-Pp-QHU" firstAttribute="centerX" secondItem="9WM-r6-cZw" secondAttribute="centerX" id="8RB-d4-IdY"/>
+                            <constraint firstItem="OXG-9d-TGm" firstAttribute="top" secondItem="l7O-dh-ath" secondAttribute="bottom" constant="54" id="8ej-bZ-mbI"/>
                             <constraint firstItem="4pV-Cm-9Ni" firstAttribute="top" secondItem="YiS-rk-bag" secondAttribute="bottom" constant="30" id="9vT-S4-Ufb"/>
                             <constraint firstItem="fp0-UW-XjV" firstAttribute="centerX" secondItem="9WM-r6-cZw" secondAttribute="centerX" id="BcS-6u-p0a"/>
                             <constraint firstItem="sFX-Fu-mxX" firstAttribute="centerX" secondItem="9WM-r6-cZw" secondAttribute="centerX" id="Ldf-7d-4y8"/>
                             <constraint firstItem="T2N-Pp-QHU" firstAttribute="centerY" secondItem="9WM-r6-cZw" secondAttribute="centerY" constant="-180" id="PkJ-B4-IND"/>
                             <constraint firstItem="sFX-Fu-mxX" firstAttribute="top" secondItem="RKG-n4-fEr" secondAttribute="bottom" constant="48" id="WRN-Oj-9dL"/>
+                            <constraint firstItem="l7O-dh-ath" firstAttribute="leading" secondItem="9WM-r6-cZw" secondAttribute="leading" constant="122" id="YDW-Ix-U2p"/>
                             <constraint firstItem="YiS-rk-bag" firstAttribute="centerX" secondItem="9WM-r6-cZw" secondAttribute="centerX" id="eYQ-Fe-TSK"/>
                             <constraint firstItem="fp0-UW-XjV" firstAttribute="top" secondItem="RKG-n4-fEr" secondAttribute="bottom" constant="13" id="eZa-F8-eZ2"/>
                             <constraint firstItem="YiS-rk-bag" firstAttribute="top" secondItem="T2N-Pp-QHU" secondAttribute="bottom" constant="30" id="ksp-IA-hfn"/>
                             <constraint firstItem="4pV-Cm-9Ni" firstAttribute="centerX" secondItem="9WM-r6-cZw" secondAttribute="centerX" id="pfg-OZ-fxp"/>
+                            <constraint firstAttribute="trailing" secondItem="l7O-dh-ath" secondAttribute="trailing" constant="122" id="rVQ-uj-HkW"/>
                             <constraint firstItem="RKG-n4-fEr" firstAttribute="top" secondItem="4pV-Cm-9Ni" secondAttribute="bottom" constant="30" id="rks-eD-sPx"/>
                             <constraint firstItem="RKG-n4-fEr" firstAttribute="centerX" secondItem="9WM-r6-cZw" secondAttribute="centerX" id="uff-0h-ysW"/>
                         </constraints>

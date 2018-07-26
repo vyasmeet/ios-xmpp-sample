@@ -29,8 +29,8 @@ class MessagesViewController: UIViewController {
     }
     
     @IBAction func sendMessage(_ sender: UIButton) {
-        // self.sendMessage(to: "dhaval@localhost")
-        self.sendMessageToGroup()
+         self.sendMessage(to: "user2@localhost")
+//        self.sendMessageToGroup()
     }
     
     func sendMessage(to user:String) {

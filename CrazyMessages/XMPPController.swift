@@ -65,7 +65,8 @@ class XMPPController: NSObject {
     
     func joinOrCreateRoom() {
         let roomMemory = XMPPRoomMemoryStorage()!
-        let roomID = XMPPJID(string: "room123@conference.localhost")!
+        // let roomID = XMPPJID(string: "room123@conference.localhost")!
+        let roomID = XMPPJID(string: "sam2@conference.localhost")!
         self.xmppRoom = XMPPRoom(roomStorage: roomMemory, jid: roomID, dispatchQueue: DispatchQueue.main)
         self.xmppRoom.activate(self.xmppStream)
         self.xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)

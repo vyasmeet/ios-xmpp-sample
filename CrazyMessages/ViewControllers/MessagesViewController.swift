@@ -29,8 +29,8 @@ class MessagesViewController: UIViewController {
     }
     
     @IBAction func sendMessage(_ sender: UIButton) {
-         self.sendMessage(to: "user2@localhost")
-//        self.sendMessageToGroup()
+//         self.sendMessage(to: "user2@localhost")
+        self.sendMessageToGroup()
     }
     
     func sendMessage(to user:String) {
@@ -84,7 +84,7 @@ extension MessagesViewController : UITableViewDelegate {
 
 extension MessagesViewController : MessageDelegate {
     func messageReceived(message: XMPPMessage) {
-        // print("FROM ==> ",message.attribute(forName: "from")?.stringValue)
+        print("FROM ==> ",message.attribute(forName: "from")?.stringValue)
         if let bodyElement = message.forName("body"), let messageTxt = bodyElement.stringValue {
             // if !self.messages.isEmpty { self.messages.removeAll() }
             var messageDict = ["message":messageTxt]
